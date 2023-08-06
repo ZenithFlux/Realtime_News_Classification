@@ -3,7 +3,7 @@ from sklearn.linear_model import LogisticRegression
 from sklearn.preprocessing import LabelEncoder
 import joblib as jl
 
-from .logger import logging as log
+from ..logger import logging as log
 
 from typing import TYPE_CHECKING
 if TYPE_CHECKING:
@@ -12,7 +12,7 @@ if TYPE_CHECKING:
 
 
 class NewsClassifier:
-    def __init__(self, load_path: str | None = None):
+    def __init__(self, load_path: 'Path | str | None' = None):
         if load_path is not None:
             self = jl.load(str(load_path))
         else :
@@ -34,5 +34,5 @@ class NewsClassifier:
         pred = self.test_pred(data)
         return self.label_map.inverse_transform(pred)
     
-    def save(self, path: 'Path' | str="."):
+    def save(self, path: 'Path | str'="."):
         jl.dump(self, str(path))

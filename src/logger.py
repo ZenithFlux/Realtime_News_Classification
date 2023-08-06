@@ -1,6 +1,7 @@
 import logging
 from datetime import datetime as dt
 import os
+import sys
 
 if not os.path.exists("logs"):
     os.mkdir("logs")

@@ -4,7 +4,7 @@ import spacy
 import pandas as pd
 from sklearn.model_selection import train_test_split
 
-from .logger import logging as log
+from ..logger import logging as log
 
 from typing import TYPE_CHECKING
 if TYPE_CHECKING:
@@ -17,9 +17,10 @@ class ClassifierDataset:
         self.nlp = spacy.load("en_core_web_lg")
         self.X_train = self.Y_train = self.X_test = self.Y_test = None
         
-    def read_csv(self, path: 'Path' | str, test_size=0.2):
+    def process_csv(self, path: 'Path | str', test_size=0.2):
         df = pd.read_csv(str(path))
         self.set_data(df, test_size)
+        return self
     
     def set_data(self, df: 'DataFrame', test_size: float=0.2):
         df = df[["Text","Category"]].dropna()
@@ -27,7 +28,13 @@ class ClassifierDataset:
         X = df.Text.apply(self.preprocess).to_numpy()
         Y = df.Category.to_numpy()
         
-        self.X_train, self.X_test, self.Y_train, self.Y_test = train_test_split(X, Y, test_size=test_size)
+        if test_size==0:
+            self.X_train, self.Y_train = X, Y
+        elif test_size==1:
+            self.X_test, self.Y_test = X, Y
+        else:
+            self.X_train, self.X_test, self.Y_train, self.Y_test = train_test_split(X, Y, test_size=test_size)
+            
         log.info("Data Transformation completed...")
         
     def preprocess(self, text: str):
