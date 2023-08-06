@@ -11,5 +11,4 @@ setup(name="news_classification",
           "spacy>=3.6.0",
           "pandas>=2.0.3",
           "scikit-learn>=1.3.0",
-          "matplotlib>=3.7.2"
       ])
