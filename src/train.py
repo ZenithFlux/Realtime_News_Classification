@@ -1,7 +1,9 @@
 import json
 
+from sklearn.model_selection import train_test_split
+
 from .logger import logging as log
-from .pipeline.data import ClassifierDataset
+from .pipeline.ingestion import process_csv, process_df
 from .pipeline.model import NewsClassifier
 from .paths import *
 
@@ -14,20 +16,26 @@ def train_model(data: 'Path | str | DataFrame', test_size: float, model_path: 'P
     log.info("Model training started...")
     
     model = NewsClassifier()
-    dataset = ClassifierDataset()
     
+    X, Y = None, None
     if isinstance(data, str) or isinstance(data, Path):
-       dataset.process_csv(data, test_size)
-    else: dataset.process_df(data, test_size) 
+       X, Y = process_csv(data)
+    else: X, Y = process_df(data) 
     
-    model.fit(dataset.X_train, dataset.Y_train)
-    scores = model.evaluate(dataset.X_test, dataset.Y_test)
+    X_train, X_test, Y_train, Y_test = [None] * 4
     
+    if test_size==0: X_train, Y_train = X, Y
+    else: X_train, X_test, Y_train, Y_test = train_test_split(X, Y, test_size=test_size)
+    
+    model.fit(X_train, Y_train)
     model.save(model_path)
-    with open(Path(model_path).parent / "eval_scores.json", 'w') as f:
-        json.dump(scores, f, indent=4)
+    
+    if test_size!=0: 
+        scores = model.evaluate(X_test, Y_test)    
+        with open(Path(model_path).parent / "eval_scores.json", 'w') as f:
+            json.dump(scores, f, indent=4)
         
     return model
 
 if __name__=="__main__":
-    train_model(DATASET_PATH / "BBC News Train.csv", 0.1)
+    train_model(DATASET_PATH / "BBC News Train.csv", 0)

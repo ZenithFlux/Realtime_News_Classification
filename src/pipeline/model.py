@@ -7,10 +7,12 @@ from sklearn.metrics import accuracy_score, precision_score, recall_score, f1_sc
 import joblib as jl
 
 from ..logger import logging as log
+from .preprocessing import DataPreprocessor
 
 from typing import TYPE_CHECKING
 if TYPE_CHECKING:
     from pathlib import Path
+    from numpy import ndarray
 
 
 class NewsClassifier:
@@ -22,14 +24,20 @@ class NewsClassifier:
             self.vectorizer = TfidfVectorizer()
             self.model = LogisticRegression()
             self.le = LabelEncoder()
+            
+        self.pp = DataPreprocessor()
         
-    def fit(self, X, Y):
+    def fit(self, X: 'ndarray | list[str]', Y: 'ndarray | list[str]'):
+        X = self.pp.process_data(X)
+        
         X = self.vectorizer.fit_transform(X)
         Y = self.le.fit_transform(Y)
         self.model.fit(X, Y)
         log.info("Model Training complete...")
     
-    def evaluate(self, X, Y) -> dict[str, float]:
+    def evaluate(self, X: 'ndarray | list[str]', Y: 'ndarray | list[str]') -> dict[str, float]:
+        X = self.pp.process_data(X)
+        
         X = self.vectorizer.transform(X)
         Y = self.le.transform(Y)
         
@@ -44,15 +52,19 @@ class NewsClassifier:
         log.info("Model Evaluation complete...")
         return scores
     
-    def test_pred(self, data):
+    def test_pred(self, data: 'ndarray | list[str]') -> 'ndarray':
+        X = self.pp.process_data(data)
         X = self.vectorizer.transform(data)
         return self.model.predict(X)
         
-    def predict(self, data):
+    def predict(self, data: 'ndarray | list[str]') -> 'ndarray':
         pred = self.test_pred(data)
         return self.le.inverse_transform(pred)
     
     def save(self, path: 'Path | str'="."):
         path = str(path)
         os.makedirs(os.path.dirname(path), exist_ok=True)
+        
+        self.pp = None
         jl.dump(self, path)
+        self.pp = DataPreprocessor()
