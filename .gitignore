@@ -3,7 +3,6 @@ _*
 
 .venv
 dataset
-ckpts
 logs
 
 *.egg-info

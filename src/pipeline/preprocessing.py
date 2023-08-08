@@ -12,7 +12,7 @@ if TYPE_CHECKING:
 
 class DataPreprocessor:
     def __init__(self):
-        self.nlp = spacy.load("en_core_web_lg")
+        self.nlp = spacy.load("en_core_web_md")
         self.preprocess = np.vectorize(self._preprocess)
         
     def process_data(self, X: 'ndarray | list[str]'):
