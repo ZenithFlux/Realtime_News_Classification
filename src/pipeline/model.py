@@ -19,7 +19,10 @@ class NewsClassifier:
     def __init__(self, load_path: 'Path | str | None' = None):
         if load_path is not None:
             m = jl.load(str(load_path))
+            
+            # updating attributes of current model with loaded model
             self.__dict__.update(m.__dict__)
+            
         else :
             self.vectorizer = TfidfVectorizer()
             self.model = LogisticRegression()
@@ -28,6 +31,8 @@ class NewsClassifier:
         self.pp = DataPreprocessor()
         
     def fit(self, X: 'ndarray | list[str]', Y: 'ndarray | list[str]'):
+        "Fit the model to given data"
+        
         X = self.pp.process_data(X)
         
         X = self.vectorizer.fit_transform(X)
@@ -36,6 +41,13 @@ class NewsClassifier:
         log.info("Model Training complete...")
     
     def evaluate(self, X: 'ndarray | list[str]', Y: 'ndarray | list[str]') -> dict[str, float]:
+        """
+        Evalute model using given data
+        
+        Returns a dict with scores of various evaluation metrics.
+        Metrics used: accuracy, precision, recall, f1_score, roc_auc.
+        """
+        
         X = self.pp.process_data(X)
         
         X = self.vectorizer.transform(X)
@@ -53,15 +65,21 @@ class NewsClassifier:
         return scores
     
     def test_pred(self, data: 'ndarray | list[str]') -> 'ndarray':
+        "Predicts class indices"
+        
         X = self.pp.process_data(data)
         X = self.vectorizer.transform(data)
         return self.model.predict(X)
         
     def predict(self, data: 'ndarray | list[str]') -> 'ndarray':
+        "Predicts class labels"
+        
         pred = self.test_pred(data)
         return self.le.inverse_transform(pred)
     
     def save(self, path: 'Path | str'="."):
+        "Saves the model for future use"
+        
         path = str(path)
         os.makedirs(os.path.dirname(path), exist_ok=True)
         

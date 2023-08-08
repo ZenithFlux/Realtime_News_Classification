@@ -12,7 +12,9 @@ if TYPE_CHECKING:
     from pathlib import Path
     from pandas import DataFrame
 
-def train_model(data: 'Path | str | DataFrame', test_size: float, model_path: 'Path | str'=MODEL_PATH):
+def train_model(data: 'Path | str | DataFrame', test_size: float, model_path: 'Path | str'=MODEL_PATH) -> NewsClassifier:
+    "Function for model training and evaluation"
+    
     log.info("Model training started...")
     
     model = NewsClassifier()

@@ -10,4 +10,4 @@ def get_news_type():
     "Receives data from 'article' field of form data"
     
     pred = model.predict([request.form.get("article")])
-    return pred[0]
+    return {"news_type": pred[0]}
